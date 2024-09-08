@@ -4,7 +4,7 @@ const socketIo = require("socket.io");
 const fs = require("fs");
 const cors = require("cors");
 
-const { default: loadHandlers } = require("./utils/loadHandlers");
+const loadHandlers = require("./utils/loadHandlers");
 
 const app = express();
 const server = http.createServer(app);
