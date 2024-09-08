@@ -1,6 +1,6 @@
-import axios from "axios";
+const axios = require("axios");
 
-const handleHttpRequestNode = async (node: any) => {
+const handleHttpRequestNode = async (node) => {
   try {
     const response = await axios.get(node.data.url);
     node.output = response.data;
@@ -11,4 +11,4 @@ const handleHttpRequestNode = async (node: any) => {
   return node;
 };
 
-export default handleHttpRequestNode;
+module.exports = handleHttpRequestNode;

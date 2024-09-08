@@ -1,13 +1,13 @@
-import fs from "fs";
-import path from "path";
+const fs = require("fs");
+const path = require("path");
 
 const loadHandlers = () => {
-  const handlers: { [key: string]: any } = {};
+  const handlers = {};
   const handlersPath = path.join(__dirname, "../handlers");
 
   fs.readdirSync(handlersPath).forEach((file) => {
-    if (file.endsWith("Handler.ts")) {
-      const handlerName = path.basename(file, ".ts");
+    if (file.endsWith("Handler.js")) {
+      const handlerName = path.basename(file, ".js");
       handlers[handlerName] = require(path.join(handlersPath, file)).default;
     }
   });
@@ -15,4 +15,4 @@ const loadHandlers = () => {
   return handlers;
 };
 
-export default loadHandlers;
+module.exports = loadHandlers;

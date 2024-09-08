@@ -1,10 +1,10 @@
-import fs from "fs";
+const fs = require("fs");
 
-const handleLogAndSaveNode = (node: any) => {
+const handleLogAndSaveNode = (node) => {
   console.log("Compiled JSON:", node.input);
   fs.writeFileSync("output.txt", node.input);
   node.output = "Saved to output.txt";
   return node;
 };
 
-export default handleLogAndSaveNode;
+module.exports = handleLogAndSaveNode;
