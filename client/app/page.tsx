@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -9,6 +9,7 @@ import ReactFlow, {
   useEdgesState,
   useNodesState,
   addEdge,
+  NodeProps,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import io from "socket.io-client";
@@ -18,6 +19,7 @@ import "tailwindcss/tailwind.css"; // Ensure Tailwind CSS is imported
 import HttpRequestNode from "./nodes/HttpRequestNode/HttpRequestNode";
 import CompileJsonNode from "./nodes/CompileJsonNode/CompileJsonNode";
 import LogAndSaveNode from "./nodes/LogAndSaveNode/LogAndSaveNode";
+import Sidebar from "./components/Sidebar";
 
 const socket = io("http://localhost:4000");
 
@@ -31,15 +33,17 @@ const App: React.FC = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [output, setOutput] = useState<string>("");
+  const [selectedNode, setSelectedNode] = useState<any>(null);
+  const sidebarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     socket.emit("getFlow");
     socket.on("flowConfig", (config: any[]) => {
       const newNodes = config.map((node) => ({
         id: node.id,
-        type: "default",
+        type: node.type,
         position: { x: 0, y: 0 },
-        data: { label: node.type },
+        data: { label: node.type, ...node.data },
       }));
       const newEdges = config
         .filter((node) => node.next)
@@ -66,14 +70,15 @@ const App: React.FC = () => {
       data: { label: type, onChange: handleNodeChange, handler: "" },
     };
     setNodes((nds) => nds.concat(newNode));
+    setSelectedNode(newNode);
   };
 
   const handleNodeChange = (updatedData: any) => {
-    setNodes((nds) =>
-      nds.map((node) =>
+    setNodes((nds) => {
+      return nds.map((node) =>
         node.id === updatedData.id ? { ...node, data: updatedData } : node
-      )
-    );
+      );
+    });
   };
 
   const deployFlow = () => {
@@ -91,8 +96,32 @@ const App: React.FC = () => {
 
   const onConnect = (params: any) => setEdges((eds) => addEdge(params, eds));
 
+  const onNodeClick = (event: React.MouseEvent, node: any) => {
+    setSelectedNode(node);
+  };
+
+  const closeSidebar = () => {
+    setSelectedNode(null);
+  };
+
+  const handleClickOutside = (event: MouseEvent) => {
+    if (
+      sidebarRef.current &&
+      !sidebarRef.current.contains(event.target as Node)
+    ) {
+      closeSidebar();
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-screen relative">
       {/* Header */}
       <header className="bg-blue-900 text-white p-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold">Flow Based Events</h1>
@@ -144,13 +173,14 @@ const App: React.FC = () => {
         </div>
 
         {/* Main Canvas Area */}
-        <div className="flex-1 p-4">
+        <div className="flex-1 p-4 relative">
           <ReactFlow
             nodes={nodes}
             edges={edges}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
+            onNodeClick={onNodeClick}
             fitView
             // nodeTypes={nodeTypes}
             className="w-full h-full bg-white border border-gray-300"
@@ -159,6 +189,18 @@ const App: React.FC = () => {
             <Controls />
             <Background />
           </ReactFlow>
+          {selectedNode && (
+            <div
+              ref={sidebarRef}
+              className="absolute right-0 top-0 h-full w-1/4 bg-gray-100 shadow-lg transition-transform transform translate-x-0"
+            >
+              <Sidebar
+                selectedNode={selectedNode}
+                onChange={handleNodeChange}
+                onClose={closeSidebar}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>
