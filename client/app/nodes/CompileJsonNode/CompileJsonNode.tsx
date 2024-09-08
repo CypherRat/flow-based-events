@@ -7,10 +7,7 @@ interface CompileJsonNodeProps {
   onChange: (data: any) => void;
 }
 
-const CompileJsonNode: React.FC<CompileJsonNodeProps> = ({
-  data,
-  onChange,
-}) => {
+const CompileJsonNode: React.FC<CompileJsonNodeProps> = ({ data }) => {
   return (
     <div className="node p-4 bg-white shadow-md rounded-lg">
       <label className="block text-sm font-medium text-gray-700 mb-2">

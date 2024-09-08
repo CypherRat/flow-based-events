@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 interface HttpRequestNodeProps {
   data: any;
@@ -11,6 +11,10 @@ const HttpRequestNode: React.FC<HttpRequestNodeProps> = ({
   onChange,
 }) => {
   const [url, setUrl] = useState(data.url || "");
+
+  useEffect(() => {
+    setUrl(data.url || "");
+  }, [data.url]);
 
   const handleUrlChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newUrl = event.target.value;
