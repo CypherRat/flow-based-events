@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState, useEffect } from "react";
@@ -14,7 +15,17 @@ import io from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
 import "tailwindcss/tailwind.css"; // Ensure Tailwind CSS is imported
 
+import HttpRequestNode from "./nodes/HttpRequestNode/HttpRequestNode";
+import CompileJsonNode from "./nodes/CompileJsonNode/CompileJsonNode";
+import LogAndSaveNode from "./nodes/LogAndSaveNode/LogAndSaveNode";
+
 const socket = io("http://localhost:4000");
+
+const nodeTypes = {
+  httpRequest: HttpRequestNode,
+  compileJson: CompileJsonNode,
+  logAndSave: LogAndSaveNode,
+};
 
 const App: React.FC = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
@@ -50,11 +61,19 @@ const App: React.FC = () => {
     const id = uuidv4();
     const newNode = {
       id,
-      type: "default",
+      type,
       position: { x: Math.random() * 500, y: Math.random() * 500 },
-      data: { label: type },
+      data: { label: type, onChange: handleNodeChange, handler: "" },
     };
     setNodes((nds) => nds.concat(newNode));
+  };
+
+  const handleNodeChange = (updatedData: any) => {
+    setNodes((nds) =>
+      nds.map((node) =>
+        node.id === updatedData.id ? { ...node, data: updatedData } : node
+      )
+    );
   };
 
   const deployFlow = () => {
@@ -63,7 +82,9 @@ const App: React.FC = () => {
       nodes.map((node) => ({
         id: node.id,
         type: node.data.label,
+        handler: node.data.handler,
         next: edges.find((edge) => edge.source === node.id)?.target || null,
+        data: node.data,
       }))
     );
   };
@@ -91,19 +112,19 @@ const App: React.FC = () => {
             <h2 className="text-xl font-bold mb-4">Nodes</h2>
             <div className="flex flex-col gap-2">
               <button
-                onClick={() => addNode("HTTP Request Node")}
+                onClick={() => addNode("httpRequest")}
                 className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
               >
                 HTTP Request Node
               </button>
               <button
-                onClick={() => addNode("Compile JSON Node")}
+                onClick={() => addNode("compileJson")}
                 className="bg-green-600 text-white p-2 rounded hover:bg-green-700"
               >
                 Compile JSON Node
               </button>
               <button
-                onClick={() => addNode("Log and Save Node")}
+                onClick={() => addNode("logAndSave")}
                 className="bg-yellow-600 text-white p-2 rounded hover:bg-yellow-700"
               >
                 Log and Save Node
@@ -131,6 +152,7 @@ const App: React.FC = () => {
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
             fitView
+            // nodeTypes={nodeTypes}
             className="w-full h-full bg-white border border-gray-300"
           >
             <MiniMap />
