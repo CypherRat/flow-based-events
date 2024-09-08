@@ -8,7 +8,7 @@ const loadHandlers = () => {
   fs.readdirSync(handlersPath).forEach((file) => {
     if (file.endsWith("Handler.js")) {
       const handlerName = path.basename(file, ".js");
-      handlers[handlerName] = require(path.join(handlersPath, file)).default;
+      handlers[handlerName] = require(path.join(handlersPath, file));
     }
   });
 
