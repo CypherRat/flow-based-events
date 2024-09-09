@@ -185,7 +185,20 @@ const App: React.FC = () => {
             // nodeTypes={nodeTypes}
             className="w-full h-full bg-white border border-gray-300"
           >
-            <MiniMap />
+            <MiniMap
+              nodeColor={(node) => {
+                switch (node.type) {
+                  case "httpRequest":
+                    return "blue";
+                  case "compileJson":
+                    return "green";
+                  case "logAndSave":
+                    return "yellow";
+                  default:
+                    return "#eee";
+                }
+              }}
+            />
             <Controls />
             <Background />
           </ReactFlow>
