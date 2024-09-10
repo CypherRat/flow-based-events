@@ -2,11 +2,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 
-interface CompileJsonNodeProps {
-  data: any;
-}
+interface CompileJsonNodeProps {}
 
-const CompileJsonNode: React.FC<CompileJsonNodeProps> = ({ data }) => {
+const CompileJsonNode: React.FC<CompileJsonNodeProps> = () => {
   return (
     <div className="node p-4 bg-white shadow-md rounded-lg">
       <h3 className="text-lg font-bold mb-2">Compile JSON Node</h3>

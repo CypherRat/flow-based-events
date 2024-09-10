@@ -2,11 +2,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 
-interface LogAndSaveNodeProps {
-  data: any;
-}
+interface LogAndSaveNodeProps {}
 
-const LogAndSaveNode: React.FC<LogAndSaveNodeProps> = ({ data }) => {
+const LogAndSaveNode: React.FC<LogAndSaveNodeProps> = () => {
   return (
     <div className="node p-4 bg-white shadow-md rounded-lg">
       <h3 className="text-lg font-bold mb-2">Log and Save Node</h3>
