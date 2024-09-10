@@ -2,8 +2,9 @@ const express = require("express");
 const http = require("http");
 const socketIo = require("socket.io");
 const fs = require("fs");
-const axios = require("axios");
 const cors = require("cors");
+
+const loadHandlers = require("./utils/loadHandlers");
 
 const app = express();
 const server = http.createServer(app);
@@ -14,10 +15,12 @@ const io = socketIo(server, {
   },
 });
 
+// app.use(express.json());
 app.use(cors({ origin: "http://localhost:3131" }));
 app.use(express.static("../client/out"));
 
 let flowConfig = [];
+const handlers = loadHandlers(); // Load and cache handlers at startup
 
 const loadFlowConfig = () => {
   try {
@@ -41,24 +44,29 @@ const saveFlowConfig = () => {
   }
 };
 
+// app.get("/data", async (req, res) => {
+//   try {
+//     const response = await axios.get(
+//       "https://jsonplaceholder.typicode.com/users/1"
+//     );
+//     res.json(response.data);
+//   } catch (error) {
+//     console.error(
+//       "Error fetching data:",
+//       error.response ? error.response.data : error.message
+//     );
+//     res.status(500).send("Error fetching data");
+//   }
+// });
+
 const executeFlow = async (flow) => {
   const nodeMap = new Map(flow.map((node) => [node.id, node]));
 
   for (const node of flow) {
-    if (node.type === "httpRequest") {
-      try {
-        const response = await axios.get(node.url);
-        node.output = response.data;
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        node.output = "Failed to fetch data";
-      }
-    } else if (node.type === "compileJson") {
-      node.output = JSON.stringify(node.input, null, 2);
-    } else if (node.type === "logAndSave") {
-      console.log("Compiled JSON:", node.input);
-      fs.writeFileSync("output.txt", node.input);
-      node.output = "Saved to output.txt";
+    const handler = handlers[node.data.handler];
+
+    if (handler) {
+      await handler(node);
     }
 
     if (node.next) {

@@ -1,0 +1,5 @@
+{
+  "watch": ["server.js", "utils/*.js", "handlers/*.js"],
+  "ignore": ["output.txt", "*.log", "flow.json"],
+  "ext": "js,json"
+}
