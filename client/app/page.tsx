@@ -9,12 +9,18 @@ import ReactFlow, {
   useEdgesState,
   useNodesState,
   addEdge,
-  NodeProps,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import io from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
-import "tailwindcss/tailwind.css"; // Ensure Tailwind CSS is imported
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faChevronDown,
+  faChevronUp,
+  faBox,
+  faFileAlt,
+  faCode,
+} from "@fortawesome/free-solid-svg-icons";
 
 import HttpRequestNode from "./nodes/HttpRequestNode/HttpRequestNode";
 import CompileJsonNode from "./nodes/CompileJsonNode/CompileJsonNode";
@@ -32,7 +38,7 @@ const nodeTypes = {
 const App: React.FC = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [output, setOutput] = useState<string>("");
+  const [output, setOutput] = useState<any[]>([]);
   const [selectedNode, setSelectedNode] = useState<any>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
@@ -57,7 +63,7 @@ const App: React.FC = () => {
     });
 
     socket.on("flowExecuted", (executedFlow: any[]) => {
-      setOutput(JSON.stringify(executedFlow, null, 2));
+      setOutput(executedFlow);
     });
   }, []);
 
@@ -74,29 +80,22 @@ const App: React.FC = () => {
   };
 
   const handleNodeChange = (updatedData: any) => {
-    setNodes((nds) => {
-      return nds.map((node) =>
-        node.id === updatedData.id ? updatedData : node
-      );
-    });
+    setNodes((nds) =>
+      nds.map((node) => (node.id === updatedData.id ? updatedData : node))
+    );
   };
 
   const getHandlerType = (type: string) => {
-    let handlerType = "";
     switch (type) {
       case "httpRequest":
-        handlerType = "httpRequestHandler";
-        break;
+        return "httpRequestHandler";
       case "compileJson":
-        handlerType = "compileJsonHandler";
-        break;
+        return "compileJsonHandler";
       case "logAndSave":
-        handlerType = "logAndSaveHandler";
-        break;
+        return "logAndSaveHandler";
       default:
-        break;
+        return "";
     }
-    return handlerType;
   };
 
   const deployFlow = () => {
@@ -137,60 +136,133 @@ const App: React.FC = () => {
     };
   }, []);
 
+  const Accordion = ({
+    title,
+    children,
+    isParent = false,
+  }: {
+    title: string;
+    isParent?: boolean;
+    children: React.ReactNode;
+  }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    return (
+      <div>
+        <button
+          className={`w-full text-left flex items-center justify-between p-3 bg-gray-700 text-white ${
+            !isParent && "rounded-lg"
+          } focus:outline-none`}
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          <span className="flex items-center">
+            <FontAwesomeIcon
+              icon={isOpen ? faChevronUp : faChevronDown}
+              className="mr-2"
+            />
+            {title}
+          </span>
+        </button>
+        {isOpen && (
+          <div
+            className={`${
+              isParent ? "bg-gray-600" : "pb-0"
+            } p-2 flex flex-col gap-2`}
+          >
+            {children}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const OutputAccordion = () => {
+    const formatContent = (content: any) => {
+      try {
+        return typeof content === "object"
+          ? JSON.stringify(content, null, 2)
+          : content;
+      } catch {
+        return content;
+      }
+    };
+
+    return (
+      <div className="overflow-y-auto h-full bg-gray-800 rounded-lg text-white flex flex-col gap-2">
+        {output.map((node: any) => (
+          <Accordion key={node.id} title={`Node: ${node.type}`} isParent>
+            {node.input && (
+              <Accordion title="Input">
+                <pre className="whitespace-pre-wrap max-h-[250px] overflow-y-auto bg-gray-700 p-2 rounded-lg">
+                  {formatContent(node.input)}
+                </pre>
+              </Accordion>
+            )}
+            {node.output && (
+              <Accordion title="Output">
+                <pre className="whitespace-pre-wrap max-h-[250px] overflow-y-auto bg-gray-700 p-2 rounded-lg">
+                  {formatContent(node.output)}
+                </pre>
+              </Accordion>
+            )}
+          </Accordion>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="flex flex-col h-screen relative">
       {/* Header */}
-      <header className="bg-blue-900 text-white p-4 flex items-center justify-between">
+      <header className="bg-gray-800 text-white p-4 flex items-center justify-between shadow-md">
         <h1 className="text-2xl font-bold">Flow Based Events</h1>
         <button
           onClick={deployFlow}
-          className="bg-red-600 text-white p-2 rounded hover:bg-red-700"
+          className="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition"
         >
           Deploy Flow
         </button>
       </header>
 
-      <div className="flex flex-1">
+      <div className="flex flex-1 overflow-hidden">
         {/* Left Sidebar */}
-        <div className="w-1/4 bg-gray-800 p-4 border-r border-gray-700 text-white flex flex-col">
+        <aside className="w-72 bg-gray-900 p-4 border-r border-gray-700 text-white flex flex-col">
           {/* Node Buttons Section */}
-          <div className="flex flex-col mb-4">
-            <h2 className="text-xl font-bold mb-4">Nodes</h2>
-            <div className="flex flex-col gap-2">
+          <div className="flex flex-col mb-6">
+            <h2 className="text-xl font-semibold mb-4">Nodes</h2>
+            <div className="flex flex-col gap-3">
               <button
                 onClick={() => addNode("httpRequest")}
-                className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
+                className="bg-teal-500 text-white px-4 py-2 rounded-lg hover:bg-teal-600 transition"
               >
+                <FontAwesomeIcon icon={faBox} className="mr-2" />
                 HTTP Request Node
               </button>
               <button
                 onClick={() => addNode("compileJson")}
-                className="bg-green-600 text-white p-2 rounded hover:bg-green-700"
+                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
               >
+                <FontAwesomeIcon icon={faFileAlt} className="mr-2" />
                 Compile JSON Node
               </button>
               <button
                 onClick={() => addNode("logAndSave")}
-                className="bg-yellow-600 text-white p-2 rounded hover:bg-yellow-700"
+                className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition"
               >
+                <FontAwesomeIcon icon={faCode} className="mr-2" />
                 Log and Save Node
               </button>
             </div>
           </div>
 
           {/* Output Section */}
-          <div className="flex-grow flex flex-col">
-            <h2 className="text-xl font-bold mb-2">Output</h2>
-            <div className="flex-grow overflow-y-auto">
-              <pre className="bg-white text-black p-4 whitespace-pre-wrap break-words rounded h-full">
-                {output}
-              </pre>
-            </div>
+          <div className="overflow-y-auto flex-grow flex flex-col">
+            <h2 className="text-xl font-semibold mb-4">Output</h2>
+            <OutputAccordion />
           </div>
-        </div>
+        </aside>
 
         {/* Main Canvas Area */}
-        <div className="flex-1 p-4 relative">
+        <main className="flex-1 relative p-4 bg-gray-100">
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -199,16 +271,16 @@ const App: React.FC = () => {
             onConnect={onConnect}
             onNodeClick={onNodeClick}
             fitView
+            className="w-full h-full border border-gray-300"
             // nodeTypes={nodeTypes}
-            className="w-full h-full bg-white border border-gray-300"
           >
             <MiniMap
               nodeColor={(node) => {
                 switch (node.type) {
                   case "httpRequest":
-                    return "blue";
+                    return "teal";
                   case "compileJson":
-                    return "green";
+                    return "blue";
                   case "logAndSave":
                     return "yellow";
                   default:
@@ -222,7 +294,7 @@ const App: React.FC = () => {
           {selectedNode && (
             <div
               ref={sidebarRef}
-              className="absolute right-0 top-0 h-full w-1/4 bg-gray-100 shadow-lg transition-transform transform translate-x-0"
+              className="absolute right-0 top-0 h-full w-72 bg-gray-900 text-white shadow-lg transition-transform transform translate-x-0"
             >
               <Sidebar
                 selectedNode={selectedNode}
@@ -231,7 +303,7 @@ const App: React.FC = () => {
               />
             </div>
           )}
-        </div>
+        </main>
       </div>
     </div>
   );
