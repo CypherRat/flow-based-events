@@ -15,8 +15,6 @@ import io from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faChevronDown,
-  faChevronUp,
   faBox,
   faFileAlt,
   faCode,
@@ -28,6 +26,7 @@ import CompileJsonNode from "./nodes/CompileJsonNode/CompileJsonNode";
 import LogAndSaveNode from "./nodes/LogAndSaveNode/LogAndSaveNode";
 import Sidebar from "./components/Sidebar";
 import Dialog from "./components/Dialog";
+import Accordion from "./components/Accordian";
 
 const socket = io("http://localhost:4000");
 
@@ -171,45 +170,6 @@ const App: React.FC = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
-  const Accordion = ({
-    title,
-    children,
-    isParent = false,
-  }: {
-    title: string;
-    isParent?: boolean;
-    children: React.ReactNode;
-  }) => {
-    const [isOpen, setIsOpen] = useState(false);
-    return (
-      <div>
-        <button
-          className={`w-full text-left flex items-center justify-between p-3 bg-gray-700 text-white ${
-            !isParent && "rounded-lg"
-          } focus:outline-none`}
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          <span className="flex items-center">
-            <FontAwesomeIcon
-              icon={isOpen ? faChevronUp : faChevronDown}
-              className="mr-2"
-            />
-            {title}
-          </span>
-        </button>
-        {isOpen && (
-          <div
-            className={`${
-              isParent ? "bg-gray-600" : "pb-0"
-            } p-2 flex flex-col gap-2`}
-          >
-            {children}
-          </div>
-        )}
-      </div>
-    );
-  };
 
   const OutputAccordion = () => {
     const formatContent = (content: any) => {
