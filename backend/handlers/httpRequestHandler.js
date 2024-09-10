@@ -2,7 +2,8 @@ const axios = require("axios");
 
 const handleHttpRequestNode = async (node) => {
   try {
-    const response = await axios.get(node.data.url);
+    const { inputs } = node.data;
+    const response = await axios.get(inputs.url);
     node.output = response.data;
   } catch (error) {
     console.error("Error fetching data:", error);
