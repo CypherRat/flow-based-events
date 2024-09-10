@@ -204,25 +204,31 @@ const App: React.FC = () => {
     };
 
     return (
-      <div className="overflow-y-auto h-full bg-gray-800 rounded-lg text-white flex flex-col gap-2">
-        {output.map((node: any) => (
-          <Accordion key={node.id} title={`Node: ${node.type}`} isParent>
-            {node.input && (
-              <Accordion title="Input">
-                <pre className="whitespace-pre-wrap max-h-[250px] overflow-y-auto bg-gray-700 p-2 rounded-lg">
-                  {formatContent(node.input)}
-                </pre>
-              </Accordion>
-            )}
-            {node.output && (
-              <Accordion title="Output">
-                <pre className="whitespace-pre-wrap max-h-[250px] overflow-y-auto bg-gray-700 p-2 rounded-lg">
-                  {formatContent(node.output)}
-                </pre>
-              </Accordion>
-            )}
-          </Accordion>
-        ))}
+      <div className="overflow-y-auto h-full bg-gray-800 rounded-lg text-white flex flex-col gap-2 scrollbar-custom">
+        {output.length === 0 ? (
+          <div className="flex items-center justify-center h-full text-gray-400">
+            Deploy to Read Output
+          </div>
+        ) : (
+          output.map((node: any) => (
+            <Accordion key={node.id} title={`Node: ${node.type}`} isParent>
+              {node.input && (
+                <Accordion title="Input">
+                  <pre className="whitespace-pre-wrap max-h-[250px] overflow-y-auto bg-gray-700 p-2 rounded-lg scrollbar-custom">
+                    {formatContent(node.input)}
+                  </pre>
+                </Accordion>
+              )}
+              {node.output && (
+                <Accordion title="Output">
+                  <pre className="whitespace-pre-wrap max-h-[250px] overflow-y-auto bg-gray-700 p-2 rounded-lg scrollbar-custom">
+                    {formatContent(node.output)}
+                  </pre>
+                </Accordion>
+              )}
+            </Accordion>
+          ))
+        )}
       </div>
     );
   };
