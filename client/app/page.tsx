@@ -43,28 +43,45 @@ const App: React.FC = () => {
   const sidebarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    socket.emit("getFlow");
-    socket.on("flowConfig", (config: any[]) => {
-      const newNodes = config.map((node) => ({
-        id: node.id,
-        type: node.type,
-        position: { x: 0, y: 0 },
-        data: { label: node.type, ...node.data },
-      }));
-      const newEdges = config
-        .filter((node) => node.next)
-        .map((node) => ({
-          id: `${node.id}-${node.next}`,
-          source: node.id,
-          target: node.next,
+    const handleFlowConfig = (config: any[]) => {
+      try {
+        const newNodes = config.map((node) => ({
+          id: node.id,
+          type: node.type,
+          position: { x: 0, y: 0 },
+          data: { label: node.type, ...node.data },
         }));
-      setNodes(newNodes);
-      setEdges(newEdges);
-    });
+        const newEdges = config
+          .filter((node) => node.next)
+          .map((node) => ({
+            id: `${node.id}-${node.next}`,
+            source: node.id,
+            target: node.next,
+          }));
+        setNodes(newNodes);
+        setEdges(newEdges);
+      } catch (error) {
+        console.error("Error processing flow config:", error);
+      }
+    };
 
-    socket.on("flowExecuted", (executedFlow: any[]) => {
-      setOutput(executedFlow);
-    });
+    const handleFlowExecuted = (executedFlow: any[]) => {
+      try {
+        setOutput(executedFlow);
+      } catch (error) {
+        console.error("Error processing flow execution:", error);
+      }
+    };
+
+    socket.emit("getFlow");
+
+    socket.on("flowConfig", handleFlowConfig);
+    socket.on("flowExecuted", handleFlowExecuted);
+
+    return () => {
+      socket.off("flowConfig", handleFlowConfig);
+      socket.off("flowExecuted", handleFlowExecuted);
+    };
   }, []);
 
   const addNode = (type: string) => {
