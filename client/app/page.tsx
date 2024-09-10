@@ -66,21 +66,36 @@ const App: React.FC = () => {
     };
 
     const handleFlowExecuted = (executedFlow: any[]) => {
-      try {
+      if (
+        Array.isArray(executedFlow) &&
+        executedFlow.every(
+          (item) =>
+            item && typeof item === "object" && "id" in item && "type" in item
+        )
+      ) {
         setOutput(executedFlow);
-      } catch (error) {
-        console.error("Error processing flow execution:", error);
+      } else {
+        console.warn("Received invalid flowExecuted data, resetting output.");
+        setOutput([]);
       }
+    };
+
+    const handleError = (error: any) => {
+      console.error("Socket.IO error:", error);
     };
 
     socket.emit("getFlow");
 
     socket.on("flowConfig", handleFlowConfig);
     socket.on("flowExecuted", handleFlowExecuted);
+    socket.on("connect_error", handleError);
+    socket.on("error", handleError);
 
     return () => {
       socket.off("flowConfig", handleFlowConfig);
       socket.off("flowExecuted", handleFlowExecuted);
+      socket.off("connect_error", handleError);
+      socket.off("error", handleError);
     };
   }, []);
 
