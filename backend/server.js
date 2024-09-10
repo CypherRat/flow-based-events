@@ -15,6 +15,7 @@ const io = socketIo(server, {
   },
 });
 
+// app.use(express.json());
 app.use(cors({ origin: "http://localhost:3131" }));
 app.use(express.static("../client/out"));
 
@@ -43,11 +44,27 @@ const saveFlowConfig = () => {
   }
 };
 
+// app.get("/data", async (req, res) => {
+//   try {
+//     const response = await axios.get(
+//       "https://jsonplaceholder.typicode.com/users/1"
+//     );
+//     res.json(response.data);
+//   } catch (error) {
+//     console.error(
+//       "Error fetching data:",
+//       error.response ? error.response.data : error.message
+//     );
+//     res.status(500).send("Error fetching data");
+//   }
+// });
+
 const executeFlow = async (flow) => {
   const nodeMap = new Map(flow.map((node) => [node.id, node]));
 
   for (const node of flow) {
-    const handler = handlers[node.handler];
+    const handler = handlers[node.data.handler];
+
     if (handler) {
       await handler(node);
     }
