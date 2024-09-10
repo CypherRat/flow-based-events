@@ -20,12 +20,14 @@ import {
   faBox,
   faFileAlt,
   faCode,
+  faExpand,
 } from "@fortawesome/free-solid-svg-icons";
 
 import HttpRequestNode from "./nodes/HttpRequestNode/HttpRequestNode";
 import CompileJsonNode from "./nodes/CompileJsonNode/CompileJsonNode";
 import LogAndSaveNode from "./nodes/LogAndSaveNode/LogAndSaveNode";
 import Sidebar from "./components/Sidebar";
+import Dialog from "./components/Dialog";
 
 const socket = io("http://localhost:4000");
 
@@ -40,6 +42,8 @@ const App: React.FC = () => {
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [output, setOutput] = useState<any[]>([]);
   const [selectedNode, setSelectedNode] = useState<any>(null);
+  const [dialogContent, setDialogContent] = useState<string | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -229,14 +233,30 @@ const App: React.FC = () => {
             <Accordion key={node.id} title={`Node: ${node.type}`} isParent>
               {node.input && (
                 <Accordion title="Input">
-                  <pre className="whitespace-pre-wrap max-h-[250px] overflow-y-auto bg-gray-700 p-2 rounded-lg scrollbar-custom">
+                  <pre className="whitespace-pre-wrap max-h-[250px] overflow-y-auto bg-gray-700 p-2 rounded-lg scrollbar-custom relative">
+                    <FontAwesomeIcon
+                      icon={faExpand}
+                      className="absolute top-3 right-3 cursor-pointer text-blue-500"
+                      onClick={() => {
+                        setDialogContent(formatContent(node.output));
+                        setIsDialogOpen(true);
+                      }}
+                    />
                     {formatContent(node.input)}
                   </pre>
                 </Accordion>
               )}
               {node.output && (
                 <Accordion title="Output">
-                  <pre className="whitespace-pre-wrap max-h-[250px] overflow-y-auto bg-gray-700 p-2 rounded-lg scrollbar-custom">
+                  <pre className="whitespace-pre-wrap max-h-[250px] overflow-y-auto bg-gray-700 p-2 rounded-lg scrollbar-custom relative">
+                    <FontAwesomeIcon
+                      icon={faExpand}
+                      className="absolute top-3 right-3 cursor-pointer text-blue-500"
+                      onClick={() => {
+                        setDialogContent(formatContent(node.output));
+                        setIsDialogOpen(true);
+                      }}
+                    />
                     {formatContent(node.output)}
                   </pre>
                 </Accordion>
@@ -340,6 +360,13 @@ const App: React.FC = () => {
                 onClose={closeSidebar}
               />
             </div>
+          )}
+          {isDialogOpen && dialogContent && (
+            <Dialog
+              isOpen={isDialogOpen}
+              onClose={() => setIsDialogOpen(false)}
+              content={dialogContent}
+            />
           )}
         </main>
       </div>
