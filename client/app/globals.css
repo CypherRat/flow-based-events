@@ -20,6 +20,23 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+.scrollbar-custom::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-track {
+  background: #2d2d2d;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  background: #6b6b6b;
+  border-radius: 4px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb:hover {
+  background: #8c8c8c;
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
