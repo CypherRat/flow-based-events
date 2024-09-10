@@ -2,19 +2,19 @@
 import React, { useState, useEffect } from "react";
 
 interface HttpRequestNodeProps {
-  data: any;
-  onChange: (data: any) => void;
+  node: any;
+  onChange: (node: any) => void;
 }
 
 const HttpRequestNode: React.FC<HttpRequestNodeProps> = ({
-  data,
+  node,
   onChange,
 }) => {
-  const [url, setUrl] = useState(data.url || "");
+  const [url, setUrl] = useState(node?.data?.inputs?.url || "");
 
   useEffect(() => {
-    setUrl(data.url || "");
-  }, [data.url]);
+    setUrl(node?.data?.inputs?.url || "");
+  }, [node?.data?.inputs?.url]);
 
   const handleUrlChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newUrl = event.target.value;
@@ -22,7 +22,7 @@ const HttpRequestNode: React.FC<HttpRequestNodeProps> = ({
   };
 
   const handleUpdate = () => {
-    onChange({ ...data, url, handler: "handleHttpRequestNode" });
+    onChange({ ...node, data: { ...node?.data, inputs: { url } } });
   };
 
   return (
