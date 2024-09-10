@@ -67,7 +67,7 @@ const App: React.FC = () => {
       id,
       type,
       position: { x: Math.random() * 500, y: Math.random() * 500 },
-      data: { label: type, onChange: handleNodeChange, handler: "" },
+      data: { label: type, inputs: {}, handler: getHandlerType(type) },
     };
     setNodes((nds) => nds.concat(newNode));
     setSelectedNode(newNode);
@@ -76,9 +76,27 @@ const App: React.FC = () => {
   const handleNodeChange = (updatedData: any) => {
     setNodes((nds) => {
       return nds.map((node) =>
-        node.id === updatedData.id ? { ...node, data: updatedData } : node
+        node.id === updatedData.id ? updatedData : node
       );
     });
+  };
+
+  const getHandlerType = (type: string) => {
+    let handlerType = "";
+    switch (type) {
+      case "httpRequest":
+        handlerType = "httpRequestHandler";
+        break;
+      case "compileJson":
+        handlerType = "compileJsonHandler";
+        break;
+      case "logAndSave":
+        handlerType = "logAndSaveHandler";
+        break;
+      default:
+        break;
+    }
+    return handlerType;
   };
 
   const deployFlow = () => {
@@ -87,7 +105,6 @@ const App: React.FC = () => {
       nodes.map((node) => ({
         id: node.id,
         type: node.data.label,
-        handler: node.data.handler,
         next: edges.find((edge) => edge.source === node.id)?.target || null,
         data: node.data,
       }))
