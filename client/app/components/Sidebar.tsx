@@ -38,11 +38,11 @@ const Sidebar: React.FC<SidebarProps> = ({
   const renderNodeComponent = () => {
     switch (selectedNode.type) {
       case "httpRequest":
-        return <HttpRequestNode data={selectedNode.data} onChange={onChange} />;
+        return <HttpRequestNode node={selectedNode} onChange={onChange} />;
       case "compileJson":
-        return <CompileJsonNode data={selectedNode.data} />;
+        return <CompileJsonNode />;
       case "logAndSave":
-        return <LogAndSaveNode data={selectedNode.data} />;
+        return <LogAndSaveNode />;
       default:
         return null;
     }
