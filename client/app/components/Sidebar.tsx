@@ -3,6 +3,7 @@ import React, { useEffect, useRef } from "react";
 import HttpRequestNode from "../nodes/HttpRequestNode/HttpRequestNode";
 import CompileJsonNode from "../nodes/CompileJsonNode/CompileJsonNode";
 import LogAndSaveNode from "../nodes/LogAndSaveNode/LogAndSaveNode";
+import KafkaNode from "../nodes/KafkaNode/kafkaNode";
 
 interface SidebarProps {
   selectedNode: any;
@@ -43,6 +44,8 @@ const Sidebar: React.FC<SidebarProps> = ({
         return <CompileJsonNode />;
       case "logAndSave":
         return <LogAndSaveNode />;
+      case "kafkaNode":
+        return <KafkaNode node={selectedNode} onChange={onChange} />;
       default:
         return null;
     }
