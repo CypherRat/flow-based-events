@@ -53,7 +53,7 @@ const App: React.FC = () => {
         const newNodes = config.map((node) => ({
           id: node.id,
           type: node.type,
-          position: { x: 0, y: 0 },
+          position: node.position || { x: 0, y: 0 },
           data: { label: node.type, ...node.data },
         }));
         const newEdges = config
@@ -156,6 +156,7 @@ const App: React.FC = () => {
       nodes.map((node) => ({
         id: node.id,
         type: node.data.label,
+        position: node.position || { x: 0, y: 0 },
         next: edges.find((edge) => edge.source === node.id)?.target || null,
         data: node.data,
       }))
@@ -306,6 +307,7 @@ const App: React.FC = () => {
             onConnect={onConnect}
             onNodeClick={onNodeClick}
             fitView
+            fitViewOptions={{ duration: 1000 }}
             className="w-full h-full border border-gray-300"
             // nodeTypes={nodeTypes}
           >

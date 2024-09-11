@@ -24,7 +24,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
   return (
     <ToastContext.Provider value={{ showSuccess, showError }}>
       {children}
-      <ToastContainer position="bottom-right" />
+      <ToastContainer position="bottom-left" />
     </ToastContext.Provider>
   );
 };
