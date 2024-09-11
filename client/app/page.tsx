@@ -20,6 +20,7 @@ import {
   faCode,
   faExpand,
 } from "@fortawesome/free-solid-svg-icons";
+import { useToast } from "./contexts/ToastContext";
 
 import HttpRequestNode from "./nodes/HttpRequestNode/HttpRequestNode";
 import CompileJsonNode from "./nodes/CompileJsonNode/CompileJsonNode";
@@ -45,13 +46,14 @@ const App: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
+  const { showSuccess, showError } = useToast();
   useEffect(() => {
     const handleFlowConfig = (config: any[]) => {
       try {
         const newNodes = config.map((node) => ({
           id: node.id,
           type: node.type,
-          position: { x: 0, y: 0 },
+          position: node.position || { x: 0, y: 0 },
           data: { label: node.type, ...node.data },
         }));
         const newEdges = config
@@ -83,6 +85,17 @@ const App: React.FC = () => {
       }
     };
 
+    const handleDeployStatus = (status: {
+      success: boolean;
+      message: string;
+    }) => {
+      if (status.success) {
+        showSuccess(status.message);
+      } else {
+        showError(status.message);
+      }
+    };
+
     const handleError = (error: any) => {
       console.error("Socket.IO error:", error);
     };
@@ -91,16 +104,18 @@ const App: React.FC = () => {
 
     socket.on("flowConfig", handleFlowConfig);
     socket.on("flowExecuted", handleFlowExecuted);
+    socket.on("deployStatus", handleDeployStatus); // Listen for deploy status
     socket.on("connect_error", handleError);
     socket.on("error", handleError);
 
     return () => {
       socket.off("flowConfig", handleFlowConfig);
       socket.off("flowExecuted", handleFlowExecuted);
+      socket.off("deployStatus", handleDeployStatus); // Clean up deploy status listener
       socket.off("connect_error", handleError);
       socket.off("error", handleError);
     };
-  }, []);
+  }, [showSuccess, showError]);
 
   const addNode = (type: string) => {
     const id = uuidv4();
@@ -112,12 +127,14 @@ const App: React.FC = () => {
     };
     setNodes((nds) => nds.concat(newNode));
     setSelectedNode(newNode);
+    showSuccess("Node added successfully!");
   };
 
   const handleNodeChange = (updatedData: any) => {
     setNodes((nds) =>
       nds.map((node) => (node.id === updatedData.id ? updatedData : node))
     );
+    showSuccess("Node updated successfully!");
   };
 
   const getHandlerType = (type: string) => {
@@ -139,6 +156,7 @@ const App: React.FC = () => {
       nodes.map((node) => ({
         id: node.id,
         type: node.data.label,
+        position: node.position || { x: 0, y: 0 },
         next: edges.find((edge) => edge.source === node.id)?.target || null,
         data: node.data,
       }))
@@ -289,6 +307,7 @@ const App: React.FC = () => {
             onConnect={onConnect}
             onNodeClick={onNodeClick}
             fitView
+            fitViewOptions={{ duration: 1000 }}
             className="w-full h-full border border-gray-300"
             // nodeTypes={nodeTypes}
           >
