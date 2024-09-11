@@ -86,10 +86,30 @@ io.on("connection", (socket) => {
   });
 
   socket.on("deployFlow", async (flow) => {
-    flowConfig = flow;
-    saveFlowConfig();
-    const executedFlow = await executeFlow(flowConfig);
-    socket.emit("flowExecuted", executedFlow);
+    try {
+      flowConfig = flow;
+      saveFlowConfig();
+      const executedFlow = await executeFlow(flowConfig);
+      console.log(executedFlow);
+      if (Array.isArray(executedFlow) && executedFlow.length) {
+        socket.emit("deployStatus", {
+          success: true,
+          message: "Flow deployed and executed successfully!",
+        });
+        socket.emit("flowExecuted", executedFlow);
+      } else {
+        socket.emit("deployStatus", {
+          success: false,
+          message: "Flow cannot be deployed as it has no nodes!",
+        });
+      }
+    } catch (error) {
+      console.error("Error deploying flow:", error);
+      socket.emit("deployStatus", {
+        success: false,
+        message: "Failed to deploy and execute flow.",
+      });
+    }
   });
 
   socket.on("getFlow", () => {
