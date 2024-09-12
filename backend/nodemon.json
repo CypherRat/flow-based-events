@@ -1,5 +1,7 @@
 {
   "watch": ["server.js", "utils/*.js", "handlers/*.js"],
-  "ignore": ["output.txt", "*.log", "flow.json","/services/kafka-consumer.js","/utils/socketManager.js"],
-  "ext": "js,json"
+  "ignore": [],
+   "ext": "js,json"
+  
+ 
 }
