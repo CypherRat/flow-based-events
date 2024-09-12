@@ -116,8 +116,11 @@ const App: React.FC = () => {
       socket.off("error", handleError);
     };
   }, [showSuccess, showError]);
-
+  socket.on("kafka",(data)=>{
+    console.log(data,"data-sock");
+  })
   const addNode = (type: string) => {
+
     const id = uuidv4();
     const newNode = {
       id,
@@ -145,6 +148,8 @@ const App: React.FC = () => {
         return "compileJsonHandler";
       case "logAndSave":
         return "logAndSaveHandler";
+      case "kafkaNode":
+        return "kafkaNodeHandler";
       default:
         return "";
     }
@@ -286,6 +291,13 @@ const App: React.FC = () => {
               >
                 <FontAwesomeIcon icon={faCode} className="mr-2" />
                 Log and Save Node
+              </button>
+              <button
+                onClick={() => addNode("kafkaNode")}
+                className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition"
+              >
+                <FontAwesomeIcon icon={faCode} className="mr-2" />
+                Kafka Node
               </button>
             </div>
           </div>

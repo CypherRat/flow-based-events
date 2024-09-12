@@ -11,7 +11,8 @@ const handleLogAndSaveNode = (node) => {
 
     fs.writeFileSync("output.txt", outputData);
 
-    node.output = "Saved to output.txt";
+      node.output = "Saved to output.txt";
+      node.output = outputData;
   } catch (error) {
     console.error("Error handling log and save:", error);
     node.output = "Failed to save to output.txt";

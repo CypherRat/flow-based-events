@@ -3,7 +3,7 @@ const http = require("http");
 const socketIo = require("socket.io");
 const fs = require("fs");
 const cors = require("cors");
-
+const { setSocket,getSocket } = require("./utils/socketManager");
 const loadHandlers = require("./utils/loadHandlers");
 
 const app = express();
@@ -31,7 +31,7 @@ const loadFlowConfig = () => {
       flowConfig = [];
     }
   } catch (err) {
-    console.error("Error reading flow config:", err);
+    console.error("Error reading flow configs:", err);
     flowConfig = [];
   }
 };
@@ -81,10 +81,12 @@ const executeFlow = async (flow) => {
 
 io.on("connection", (socket) => {
   console.log("New client connected");
+  setSocket(socket);
+  // getSocket()
   socket.on("disconnect", () => {
     console.log("Client disconnected");
   });
-
+   
   socket.on("deployFlow", async (flow) => {
     try {
       flowConfig = flow;
