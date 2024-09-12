@@ -41,6 +41,7 @@ const App: React.FC = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [output, setOutput] = useState<any[]>([]);
+  const [kafkaOutput, setKafkaOutput] = useState<any>();
   const [selectedNode, setSelectedNode] = useState<any>(null);
   const [dialogContent, setDialogContent] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -70,7 +71,8 @@ const App: React.FC = () => {
       }
     };
 
-    const handleFlowExecuted = (executedFlow: any[]) => {
+    const handleFlowExecuted = (executedFlow : any) => {
+
       if (
         Array.isArray(executedFlow) &&
         executedFlow.every(
@@ -79,10 +81,12 @@ const App: React.FC = () => {
         )
       ) {
         setOutput(executedFlow);
+        // console.log("executed Flow",executedFlow);
       } else {
         console.warn("Received invalid flowExecuted data, resetting output.");
         setOutput([]);
       }
+      // setOutput(executedFlow)
     };
 
     const handleDeployStatus = (status: {
@@ -104,10 +108,12 @@ const App: React.FC = () => {
 
     socket.on("flowConfig", handleFlowConfig);
     socket.on("flowExecuted", handleFlowExecuted);
+
+    // socket.on("flowExecuted")
     socket.on("deployStatus", handleDeployStatus); // Listen for deploy status
     socket.on("connect_error", handleError);
     socket.on("error", handleError);
-
+    
     return () => {
       socket.off("flowConfig", handleFlowConfig);
       socket.off("flowExecuted", handleFlowExecuted);
@@ -117,7 +123,16 @@ const App: React.FC = () => {
     };
   }, [showSuccess, showError]);
   socket.on("kafka",(data)=>{
-    console.log(data,"data-sock");
+    console.log(data,"kafka-data-sock");
+    socket.emit("runFlow",data);
+
+  })
+  socket.on("kafkaOutput",(output)=>{
+    console.log("current output is",output);
+   setKafkaOutput((prevOutput:any)=>{
+    console.log("prevoutput",prevOutput);
+     return prevOutput+output
+   }) 
   })
   const addNode = (type: string) => {
 
@@ -207,7 +222,7 @@ const App: React.FC = () => {
 
     return (
       <div className="overflow-y-auto h-full bg-gray-800 rounded-lg text-white flex flex-col gap-2 scrollbar-custom">
-        {output.length === 0 ? (
+        {/* {output.length === 0 ? (
           <div className="flex items-center justify-center h-full text-gray-400">
             Deploy to Read Output
           </div>
@@ -246,7 +261,14 @@ const App: React.FC = () => {
               )}
             </Accordion>
           ))
-        )}
+        )} */
+       
+        }
+        <pre >
+          {
+            kafkaOutput
+          }
+        </pre>
       </div>
     );
   };
